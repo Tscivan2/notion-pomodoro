@@ -20,143 +20,71 @@
       font-family: 'EB Garamond', serif;
       color: var(--cream);
     }
-    .scene {
-      position: relative;
-      width: 100%; height: 100vh;
-      display: flex;
-      align-items: stretch;
-    }
+    .scene { position: relative; width: 100%; height: 100vh; display: flex; align-items: stretch; }
     .bg {
-      position: absolute;
-      inset: 0;
+      position: absolute; inset: 0;
       background-image: url('https://i.imgur.com/fkfWNXw.jpg');
-      background-size: cover;
-      background-position: center 20%;
-      z-index: 0;
+      background-size: cover; background-position: center 20%; z-index: 0;
     }
     .fog-left   { position: absolute; inset: 0; background: linear-gradient(to right, rgba(8,22,14,0.96) 0%, rgba(8,22,14,0.55) 55%, transparent 100%); z-index: 1; }
     .fog-bottom { position: absolute; inset: 0; background: linear-gradient(to top, rgba(8,22,14,0.75) 0%, transparent 45%); z-index: 1; }
     .fog-top    { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(8,22,14,0.55) 0%, transparent 30%); z-index: 1; }
 
     .panel {
-      position: relative;
-      z-index: 10;
-      width: 440px;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 60px 55px;
+      position: relative; z-index: 10; width: 440px; flex-shrink: 0;
+      display: flex; flex-direction: column; justify-content: center; padding: 60px 55px;
     }
     .panel::after {
-      content: '';
-      position: absolute;
-      right: 0; top: 15%; bottom: 15%;
-      width: 1px;
-      background: linear-gradient(to bottom, transparent, rgba(143,184,160,0.25), rgba(201,168,76,0.35), transparent);
+      content: ''; position: absolute; right: 0; top: 15%; bottom: 15%;
+      width: 1px; background: linear-gradient(to bottom, transparent, rgba(143,184,160,0.25), rgba(201,168,76,0.35), transparent);
     }
 
-    .mantra {
-      font-style: italic;
-      font-size: 13px;
-      color: rgba(143,184,160,0.6);
-      letter-spacing: 1.8px;
-      margin-bottom: 35px;
-      line-height: 1.9;
-    }
+    .mantra { font-style: italic; font-size: 13px; color: rgba(143,184,160,0.6); letter-spacing: 1.8px; margin-bottom: 35px; line-height: 1.9; }
 
     .tabs {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 45px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(143,184,160,0.12);
-      border-radius: 30px;
-      padding: 5px;
+      display: flex; gap: 6px; margin-bottom: 45px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(143,184,160,0.12);
+      border-radius: 30px; padding: 5px;
     }
     .tab {
-      font-family: 'Cinzel', serif;
-      font-size: 10px;
-      letter-spacing: 1.6px;
-      text-transform: uppercase;
-      padding: 9px 18px;
-      border-radius: 25px;
-      background: transparent;
-      color: rgba(143,184,160,0.5);
-      cursor: pointer;
+      font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 1.6px;
+      text-transform: uppercase; padding: 9px 18px; border-radius: 25px;
+      background: transparent; color: rgba(143,184,160,0.5); cursor: pointer;
     }
     .tab.active {
-      background: rgba(201,168,76,0.15);
-      color: var(--gold);
-      border: 1px solid rgba(201,168,76,0.35);
+      background: rgba(201,168,76,0.15); color: var(--gold); border: 1px solid rgba(201,168,76,0.35);
     }
 
     .ring-wrap {
-      position: relative;
-      width: 260px;
-      height: 260px;
-      margin: 0 auto 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .ring-svg {
-      position: absolute;
-      top: 0; left: 0;
+      position: relative; width: 260px; height: 260px; margin: 0 auto 40px;
+      display: flex; align-items: center; justify-content: center;
     }
     .ring-center {
-      position: relative;
-      z-index: 2;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      cursor: pointer;
+      position: relative; z-index: 2; width: 100%; height: 100%;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; text-align: center; cursor: pointer;
     }
     .time-display {
-      font-family: 'Cinzel', serif;
-      font-size: 58px;
-      font-weight: 500;
-      letter-spacing: 4px;
-      text-shadow: 0 0 30px rgba(201,168,76,0.3);
+      font-family: 'Cinzel', serif; font-size: 58px; font-weight: 500;
+      letter-spacing: 4px; text-shadow: 0 0 30px rgba(201,168,76,0.3);
     }
     .mode-label {
-      font-style: italic;
-      font-size: 13px;
-      color: var(--mist);
-      letter-spacing: 2.5px;
-      margin-top: 6px;
+      font-style: italic; font-size: 13px; color: var(--mist);
+      letter-spacing: 2.5px; margin-top: 6px;
     }
 
     .controls {
-      display: flex;
-      gap: 18px;
-      justify-content: center;
-      margin-bottom: 30px;
+      display: flex; gap: 18px; justify-content: center; margin-bottom: 30px;
     }
     .btn-main {
-      font-family: 'Cinzel', serif;
-      font-size: 11px;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      padding: 14px 42px;
-      border-radius: 30px;
-      border: 1px solid var(--gold);
-      background: rgba(201,168,76,0.08);
-      color: var(--gold);
-      cursor: pointer;
+      font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 3px;
+      text-transform: uppercase; padding: 14px 42px; border-radius: 30px;
+      border: 1px solid var(--gold); background: rgba(201,168,76,0.08);
+      color: var(--gold); cursor: pointer;
     }
     .btn-icon {
-      width: 44px; height: 44px;
-      border-radius: 50%;
-      border: 1px solid rgba(143,184,160,0.3);
-      background: transparent;
-      color: rgba(143,184,160,0.6);
-      font-size: 18px;
-      cursor: pointer;
+      width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(143,184,160,0.3);
+      background: transparent; color: rgba(143,184,160,0.6); font-size: 18px; cursor: pointer;
     }
   </style>
 </head>
@@ -215,8 +143,9 @@
   const startBtn = document.getElementById('startBtn');
   const timerClickArea = document.getElementById('timerClickArea');
 
-  // More reliable gentle meditation bell sound
-  const bell = new Audio('https://assets.mixkit.co/sfx/preview/2578/2578.wav');
+  // Louder & more reliable meditation bell
+  const bell = new Audio('https://www.orangefreesounds.com/wp-content/uploads/2018/03/Meditation-bell-sound.mp3');
+  bell.volume = 0.95;
 
   function fmt(s) {
     const m = Math.floor(s / 60);
@@ -258,10 +187,8 @@
           running = false;
           startBtn.textContent = 'BEGIN';
           
-          // Play bell
           bell.currentTime = 0;
-          bell.volume = 0.8;
-          bell.play().catch(e => console.log("Audio play blocked:", e));
+          bell.play().catch(e => console.log("Sound blocked:", e));
           
           timeDisp.style.color = '#c9a84c';
           setTimeout(() => timeDisp.style.color = '', 2500);
@@ -270,31 +197,31 @@
     }
   }
 
-  function resetTimer() {
-    clearInterval(interval);
-    running = false;
-    remainSecs = totalSecs;
-    startBtn.textContent = 'BEGIN';
-    updateDisplay();
-  }
+  function resetTimer() { clearInterval(interval); running = false; remainSecs = totalSecs; startBtn.textContent = 'BEGIN'; updateDisplay(); }
+  function skipSession() { resetTimer(); }
 
-  function skipSession() {
-    resetTimer();
-  }
-
-  // Click time to change duration
+  // Click time to set duration (supports seconds)
   timerClickArea.addEventListener('click', () => {
     if (running) return;
-    const newMin = prompt(`Set ${currentMode} duration in minutes:`, durations[currentMode]);
-    if (newMin !== null && !isNaN(newMin) && newMin > 0) {
-      durations[currentMode] = parseInt(newMin);
-      totalSecs = durations[currentMode] * 60;
+    let input = prompt(`Set ${currentMode} time:\n\nExamples:\n25 → 25 minutes\n5:30 → 5 min 30 sec\n90 → 90 seconds`, durations[currentMode]);
+    if (input === null) return;
+
+    let totalSeconds = 0;
+    if (input.includes(':')) {
+      const [m, s] = input.split(':').map(Number);
+      totalSeconds = (m || 0) * 60 + (s || 0);
+    } else {
+      totalSeconds = parseFloat(input) * 60;
+    }
+
+    if (totalSeconds > 0) {
+      durations[currentMode] = totalSeconds / 60;
+      totalSecs = Math.floor(totalSeconds);
       remainSecs = totalSecs;
       updateDisplay();
     }
   });
 
-  // Tab clicks
   document.getElementById('tabs').addEventListener('click', e => {
     const btn = e.target.closest('.tab');
     if (btn) {
@@ -304,10 +231,8 @@
     }
   });
 
-  // Unlock audio on first click (helps with browser policy)
-  document.addEventListener('click', () => {
-    bell.volume = 0.8;
-  }, { once: true });
+  // Unlock audio
+  document.addEventListener('click', () => { bell.volume = 0.95; }, { once: true });
 
   updateDisplay();
 </script>
