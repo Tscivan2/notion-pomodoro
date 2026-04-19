@@ -95,15 +95,14 @@ html, body {
   border: 1px solid rgba(201,168,76,0.35);
 }
 
-.tab:hover:not(.active) {
-  color: rgba(143,184,160,0.85);
-}
+.tab:hover:not(.active) { color: rgba(143,184,160,0.85); }
 
+/* ── RING ── */
 .ring-wrap {
   position: relative;
   width: 260px;
   height: 260px;
-  margin: 0 auto 40px;
+  margin: 0 auto 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -123,7 +122,6 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
 }
 
 .time-display {
@@ -131,6 +129,8 @@ html, body {
   font-size: 58px;
   letter-spacing: 4px;
   transition: color 0.5s ease;
+  cursor: default;
+  user-select: none;
 }
 
 .mode-label {
@@ -141,11 +141,75 @@ html, body {
   transition: color 0.5s ease;
 }
 
+/* ── ADJUST BUTTONS (shown when not running) ── */
+.adjust-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+
+.adjust-row.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.adj-label {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: rgba(143,184,160,0.4);
+  text-transform: uppercase;
+  width: 54px;
+  text-align: center;
+}
+
+.adj-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.adj-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(143,184,160,0.25);
+  background: transparent;
+  color: rgba(143,184,160,0.55);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.adj-btn:hover {
+  border-color: rgba(143,184,160,0.7);
+  color: var(--mist);
+  background: rgba(143,184,160,0.07);
+}
+
+.adj-val {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  color: rgba(143,184,160,0.7);
+  min-width: 28px;
+  text-align: center;
+}
+
+/* ── CONTROLS ── */
 .controls {
   display: flex;
   gap: 18px;
   justify-content: center;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .btn-main {
@@ -161,9 +225,7 @@ html, body {
   transition: all 0.35s ease;
 }
 
-.btn-main:hover {
-  background: rgba(201,168,76,0.18);
-}
+.btn-main:hover { background: rgba(201,168,76,0.18); }
 
 .btn-icon {
   width: 44px;
@@ -187,7 +249,7 @@ html, body {
   display: flex;
   gap: 11px;
   justify-content: center;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 .dot {
@@ -224,25 +286,23 @@ html, body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 1;
+  z-index: 2;
   overflow: hidden;
 }
 
 .orb {
   position: absolute;
   bottom: -20px;
-  width: 7px;
-  height: 7px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(143,184,160,0.7), transparent 70%);
-  opacity: 0.3;
   animation: floatUp linear forwards;
 }
 
 @keyframes floatUp {
-  from { transform: translateY(0); opacity: 0; }
-  10%  { opacity: 0.35; }
-  to   { transform: translateY(-110vh); opacity: 0; }
+  0%   { transform: translateY(0) translateX(0);    opacity: 0;    }
+  8%   { opacity: 0.55; }
+  50%  { transform: translateY(-55vh) translateX(15px); }
+  92%  { opacity: 0.25; }
+  100% { transform: translateY(-112vh) translateX(-10px); opacity: 0; }
 }
 </style>
 </head>
@@ -250,7 +310,7 @@ html, body {
 <body>
 
 <div class="scene">
-  <div class="bg" id="bg"></div>
+  <div class="bg"></div>
   <div class="orbs" id="orbs"></div>
   <div class="fog-left"></div>
   <div class="fog-bottom"></div>
@@ -287,13 +347,29 @@ html, body {
       </div>
     </div>
 
+    <!-- ADJUST BUTTONS: +/- minutes and seconds -->
+    <div class="adjust-row" id="adjustRow">
+      <div class="adj-group">
+        <button class="adj-btn" onclick="adjustTime('min', 1)">+</button>
+        <div class="adj-val" id="adjMin">25</div>
+        <button class="adj-btn" onclick="adjustTime('min', -1)">−</button>
+        <div class="adj-label">min</div>
+      </div>
+      <div style="color:rgba(143,184,160,0.2);font-size:28px;margin-bottom:18px;">·</div>
+      <div class="adj-group">
+        <button class="adj-btn" onclick="adjustTime('sec', 10)">+</button>
+        <div class="adj-val" id="adjSec">00</div>
+        <button class="adj-btn" onclick="adjustTime('sec', -10)">−</button>
+        <div class="adj-label">sec</div>
+      </div>
+    </div>
+
     <div class="controls">
       <button class="btn-icon" onclick="resetTimer()">↺</button>
       <button class="btn-main" id="startBtn" onclick="toggleTimer()">BEGIN</button>
       <button class="btn-icon" onclick="skipSession()">⟫</button>
     </div>
 
-    <!-- SESSION DOTS -->
     <div class="session-dots">
       <div class="dot current" id="dot0"></div>
       <div class="dot"         id="dot1"></div>
@@ -301,7 +377,6 @@ html, body {
       <div class="dot"         id="dot3"></div>
     </div>
 
-    <!-- FOOTER PHRASE -->
     <div class="footer-phrase" id="footerPhrase">session 1 of 4 · breathe deeply</div>
 
   </div>
@@ -347,21 +422,24 @@ const PHRASES = [
 const CIRC = 742;
 
 // ── STATE ──────────────────────────────────────────────
-let currentMode = 'pomodoro';
-let totalSecs   = MODES.pomodoro.duration;
-let remainSecs  = totalSecs;
-let running     = false;
-let interval    = null;
-let currentSession = 0; // 0–3
+let currentMode    = 'pomodoro';
+let totalSecs      = MODES.pomodoro.duration;
+let remainSecs     = totalSecs;
+let running        = false;
+let interval       = null;
+let currentSession = 0;
 
 // ── ELEMENTS ───────────────────────────────────────────
-const ring      = document.getElementById('progressRing');
-const timeDisp  = document.getElementById('timeDisplay');
-const modeLabel = document.getElementById('modeLabel');
-const startBtn  = document.getElementById('startBtn');
-const footer    = document.getElementById('footerPhrase');
+const ring       = document.getElementById('progressRing');
+const timeDisp   = document.getElementById('timeDisplay');
+const modeLabel  = document.getElementById('modeLabel');
+const startBtn   = document.getElementById('startBtn');
+const footer     = document.getElementById('footerPhrase');
+const adjustRow  = document.getElementById('adjustRow');
+const adjMin     = document.getElementById('adjMin');
+const adjSec     = document.getElementById('adjSec');
 
-// ── HELPERS ────────────────────────────────────────────
+// ── DISPLAY ────────────────────────────────────────────
 function fmt(s) {
   const m = Math.floor(s / 60), ss = s % 60;
   return m + ':' + (ss < 10 ? '0' : '') + ss;
@@ -371,40 +449,47 @@ function updateDisplay() {
   timeDisp.textContent = fmt(remainSecs);
   const offset = CIRC * (1 - remainSecs / totalSecs);
   ring.style.strokeDashoffset = offset.toFixed(1);
-}
-
-function updateDots() {
-  for (let i = 0; i < 4; i++) {
-    const d = document.getElementById('dot' + i);
-    d.className = 'dot';
-    if (i === currentSession) d.classList.add('current');
-    else if (i < currentSession) d.classList.add('done');
+  // keep adjuster labels in sync when not running
+  if (!running) {
+    adjMin.textContent = Math.floor(remainSecs / 60);
+    adjSec.textContent = String(remainSecs % 60).padStart(2, '0');
   }
 }
 
-function updateFooter(custom) {
-  const phrase = custom || PHRASES[Math.floor(Math.random() * PHRASES.length)];
-  footer.textContent = 'session ' + (currentSession + 1) + ' of 4 · ' + phrase;
+// ── ADJUST TIME (minutes / seconds, only when stopped) ──
+function adjustTime(unit, delta) {
+  if (running) return;
+  if (unit === 'min') {
+    const mins = Math.max(0, Math.floor(remainSecs / 60) + delta);
+    const secs = remainSecs % 60;
+    remainSecs = Math.max(1, mins * 60 + secs);
+  } else {
+    remainSecs = Math.max(1, remainSecs + delta);
+    // clamp seconds part 0–59
+    const secs = remainSecs % 60;
+    if (secs < 0) remainSecs += 60;
+  }
+  totalSecs = remainSecs; // new custom total for ring
+  updateDisplay();
 }
 
-// ── TAB SWITCHING ──────────────────────────────────────
+// ── TABS ───────────────────────────────────────────────
 document.getElementById('tabs').addEventListener('click', e => {
   const btn = e.target.closest('.tab');
   if (!btn || btn.dataset.mode === currentMode) return;
-
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
-
   clearInterval(interval);
   running = false;
-  currentMode = btn.dataset.mode;
-  totalSecs   = MODES[currentMode].duration;
-  remainSecs  = totalSecs;
+  currentMode           = btn.dataset.mode;
+  totalSecs             = MODES[currentMode].duration;
+  remainSecs            = totalSecs;
   modeLabel.textContent = MODES[currentMode].label;
   ring.style.stroke     = MODES[currentMode].ringColor;
   startBtn.textContent  = 'BEGIN';
+  adjustRow.classList.remove('hidden');
   updateDisplay();
-  updateFooter(currentMode === 'pomodoro' ? 'breathe deeply' : (currentMode === 'short' ? 'rest now' : 'deep rest'));
+  updateFooter(currentMode === 'short' ? 'rest now' : currentMode === 'long' ? 'deep rest' : 'breathe deeply');
 });
 
 // ── TIMER ──────────────────────────────────────────────
@@ -415,11 +500,12 @@ function toggleTimer() {
     clearInterval(interval);
     running = false;
     startBtn.textContent = 'RESUME';
+    adjustRow.classList.remove('hidden'); // show adjuster when paused
   } else {
-    playBell(); // 🔔 bell on begin / resume
-
+    playBell();
     running = true;
     startBtn.textContent = 'PAUSE';
+    adjustRow.classList.add('hidden');    // hide adjuster while running
 
     interval = setInterval(() => {
       if (remainSecs > 0) {
@@ -429,6 +515,7 @@ function toggleTimer() {
         clearInterval(interval);
         running = false;
         startBtn.textContent = 'BEGIN';
+        adjustRow.classList.remove('hidden');
         onComplete();
       }
     }, 1000);
@@ -444,15 +531,18 @@ function onComplete() {
   } else {
     updateFooter('rest complete · ready to focus');
   }
+  totalSecs  = MODES[currentMode].duration;
   remainSecs = totalSecs;
   updateDisplay();
 }
 
 function resetTimer() {
   clearInterval(interval);
-  running = false;
+  running    = false;
+  totalSecs  = MODES[currentMode].duration;
   remainSecs = totalSecs;
   startBtn.textContent = 'BEGIN';
+  adjustRow.classList.remove('hidden');
   updateDisplay();
   updateFooter();
 }
@@ -464,23 +554,50 @@ function skipSession() {
     currentSession = (currentSession + 1) % 4;
     updateDots();
   }
+  totalSecs  = MODES[currentMode].duration;
   remainSecs = totalSecs;
   startBtn.textContent = 'BEGIN';
+  adjustRow.classList.remove('hidden');
   updateDisplay();
   updateFooter();
+}
+
+// ── DOTS & FOOTER ──────────────────────────────────────
+function updateDots() {
+  for (let i = 0; i < 4; i++) {
+    const d = document.getElementById('dot' + i);
+    d.className = 'dot';
+    if (i === currentSession) d.classList.add('current');
+    else if (i < currentSession) d.classList.add('done');
+  }
+}
+
+function updateFooter(custom) {
+  const phrase = custom || PHRASES[Math.floor(Math.random() * PHRASES.length)];
+  footer.textContent = 'session ' + (currentSession + 1) + ' of 4 · ' + phrase;
 }
 
 // ── ORBS ───────────────────────────────────────────────
 const orbsEl = document.getElementById('orbs');
 
-setInterval(() => {
+function spawnOrb() {
   const o = document.createElement('div');
   o.className = 'orb';
-  o.style.left            = Math.random() * 100 + 'vw';
-  o.style.animationDuration = (6 + Math.random() * 6) + 's';
+  const size = 4 + Math.random() * 8;
+  const dur  = 7 + Math.random() * 8;
+  o.style.cssText = `
+    left: ${Math.random() * 100}vw;
+    width: ${size}px;
+    height: ${size}px;
+    animation-duration: ${dur}s;
+    background: radial-gradient(circle at 35% 35%, rgba(201,168,76,0.9), rgba(143,184,160,0.4) 50%, transparent 70%);
+    box-shadow: 0 0 ${size * 2}px rgba(201,168,76,0.35);
+  `;
   orbsEl.appendChild(o);
-  setTimeout(() => o.remove(), 12000);
-}, 700);
+  setTimeout(() => o.remove(), dur * 1000);
+}
+
+setInterval(spawnOrb, 600);
 
 // ── INIT ───────────────────────────────────────────────
 updateDisplay();
