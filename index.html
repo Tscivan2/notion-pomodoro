@@ -34,38 +34,49 @@ button {
 
 <script>
 
-// 🔊 Embedded sound (no internet needed)
-const bell = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=");
+let audioCtx;
 
-// 🔓 Unlock audio on first click
-document.addEventListener('click', () => {
-  bell.play().then(() => {
-    bell.pause();
-    bell.currentTime = 0;
-    console.log("Audio unlocked");
-  }).catch(e => console.log("Unlock failed:", e));
-}, { once: true });
+// 🔓 Must be created on user interaction
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    console.log("AudioContext started");
+  }
+}
 
+// 🔔 Zen bell sound (sine wave + fade)
 function playBell() {
-  bell.currentTime = 0;
-  bell.play().then(() => {
-    console.log("Bell played");
-  }).catch(e => {
-    console.log("Play failed:", e);
-    alert("Sound blocked 😭 — check browser settings");
-  });
+  if (!audioCtx) return;
+
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(440, audioCtx.currentTime); // tone
+
+  gain.gain.setValueAtTime(0.8, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2);
+
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.start();
+  osc.stop(audioCtx.currentTime + 2);
 }
 
 // 🧪 manual test
 function testSound() {
+  initAudio();
   playBell();
 }
 
-// ⏱ simple timer test
+// ⏱ timer
 let t = 10;
 let int;
 
 function start() {
+  initAudio();
+
   clearInterval(int);
   t = 10;
   document.getElementById("time").textContent = t;
