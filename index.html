@@ -4,15 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zen Pomodoro</title>
+
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
       --jade-deep: #0a1f14;
       --mist: #8fb8a0;
       --gold: #c9a84c;
       --cream: #f0ebe0;
     }
+
     html, body {
       width: 100%; height: 100%;
       background: var(--jade-deep);
@@ -20,13 +24,15 @@
       font-family: 'EB Garamond', serif;
       color: var(--cream);
     }
+
     .scene {
       position: relative;
       width: 100%; height: 100vh;
       display: flex;
-      align-items: center;     /* Center vertically */
-      justify-content: center; /* Center horizontally */
+      align-items: center;
+      justify-content: center;
     }
+
     .bg {
       position: absolute;
       inset: 0;
@@ -35,6 +41,7 @@
       background-position: center 20%;
       z-index: 0;
     }
+
     .fog-left   { position: absolute; inset: 0; background: linear-gradient(to right, rgba(8,22,14,0.96) 0%, rgba(8,22,14,0.55) 55%, transparent 100%); z-index: 1; }
     .fog-bottom { position: absolute; inset: 0; background: linear-gradient(to top, rgba(8,22,14,0.75) 0%, transparent 45%); z-index: 1; }
     .fog-top    { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(8,22,14,0.55) 0%, transparent 30%); z-index: 1; }
@@ -45,7 +52,7 @@
       width: 440px;
       display: flex;
       flex-direction: column;
-      align-items: center;     /* Center content inside panel */
+      align-items: center;
       text-align: center;
     }
 
@@ -67,6 +74,7 @@
       border-radius: 30px;
       padding: 5px;
     }
+
     .tab {
       font-family: 'Cinzel', serif;
       font-size: 10px;
@@ -78,6 +86,7 @@
       color: rgba(143,184,160,0.5);
       cursor: pointer;
     }
+
     .tab.active {
       background: rgba(201,168,76,0.15);
       color: var(--gold);
@@ -93,10 +102,12 @@
       align-items: center;
       justify-content: center;
     }
+
     .ring-svg {
       position: absolute;
       top: 0; left: 0;
     }
+
     .ring-center {
       position: relative;
       z-index: 2;
@@ -109,6 +120,7 @@
       text-align: center;
       cursor: pointer;
     }
+
     .time-display {
       font-family: 'Cinzel', serif;
       font-size: 58px;
@@ -116,6 +128,7 @@
       letter-spacing: 4px;
       text-shadow: 0 0 30px rgba(201,168,76,0.3);
     }
+
     .mode-label {
       font-style: italic;
       font-size: 13px;
@@ -130,6 +143,7 @@
       justify-content: center;
       margin-bottom: 30px;
     }
+
     .btn-main {
       font-family: 'Cinzel', serif;
       font-size: 11px;
@@ -142,6 +156,7 @@
       color: var(--gold);
       cursor: pointer;
     }
+
     .btn-icon {
       width: 44px; height: 44px;
       border-radius: 50%;
@@ -153,7 +168,9 @@
     }
   </style>
 </head>
+
 <body>
+
 <div class="scene">
   <div class="bg"></div>
   <div class="fog-left"></div>
@@ -161,6 +178,7 @@
   <div class="fog-top"></div>
 
   <div class="panel">
+
     <div class="mantra">
       gate gate pāragate<br>
       pārasaṃgate · bodhi svāhā
@@ -175,11 +193,14 @@
     <div class="ring-wrap">
       <svg class="ring-svg" viewBox="0 0 260 260" width="260" height="260">
         <circle cx="130" cy="130" r="118" fill="none" stroke="rgba(143,184,160,0.08)" stroke-width="8"/>
-        <circle id="progressRing" cx="130" cy="130" r="118" fill="none" 
-          stroke="#c9a84c" stroke-width="7" stroke-dasharray="742" stroke-dashoffset="0"
-          stroke-linecap="round" transform="rotate(-90 130 130)" 
+        <circle id="progressRing" cx="130" cy="130" r="118" fill="none"
+          stroke="#c9a84c" stroke-width="7"
+          stroke-dasharray="742" stroke-dashoffset="0"
+          stroke-linecap="round"
+          transform="rotate(-90 130 130)"
           style="transition: stroke-dashoffset 0.6s linear;"/>
       </svg>
+
       <div class="ring-center" id="timerClickArea">
         <div class="time-display" id="timeDisplay">25:00</div>
         <div class="mode-label" id="modeLabel">focus</div>
@@ -191,117 +212,135 @@
       <button class="btn-main" id="startBtn" onclick="toggleTimer()">BEGIN</button>
       <button class="btn-icon" onclick="skipSession()">⟫</button>
     </div>
+
   </div>
 </div>
 
 <script>
-  let durations = { pomodoro: 25, short: 5, long: 15 };
-  let currentMode = 'pomodoro';
-  let totalSecs = durations.pomodoro * 60;
-  let remainSecs = totalSecs;
-  let running = false;
-  let interval = null;
 
-  const ring = document.getElementById('progressRing');
-  const timeDisp = document.getElementById('timeDisplay');
-  const modeLabel = document.getElementById('modeLabel');
-  const startBtn = document.getElementById('startBtn');
-  const timerClickArea = document.getElementById('timerClickArea');
+let durations = { pomodoro: 25, short: 5, long: 15 };
+let currentMode = 'pomodoro';
+let totalSecs = durations.pomodoro * 60;
+let remainSecs = totalSecs;
+let running = false;
+let interval = null;
 
-  const bell = new Audio('https://assets.mixkit.co/sfx/preview/2578/2578.wav');
-  bell.volume = 0.95;
+const ring = document.getElementById('progressRing');
+const timeDisp = document.getElementById('timeDisplay');
+const modeLabel = document.getElementById('modeLabel');
+const startBtn = document.getElementById('startBtn');
+const timerClickArea = document.getElementById('timerClickArea');
 
-  function fmt(s) {
-    const m = Math.floor(s / 60);
-    const ss = s % 60;
-    return `${m}:${ss < 10 ? '0' : ''}${ss}`;
-  }
+// ✅ Reliable bell sound
+const bell = new Audio('https://www.soundjay.com/misc/sounds/bell-ringing-05.wav');
+bell.volume = 1.0;
 
-  function updateDisplay() {
-    timeDisp.textContent = fmt(remainSecs);
-    const progress = (remainSecs / totalSecs) * 742;
-    ring.style.strokeDashoffset = (742 - progress).toFixed(1);
-  }
+// ✅ Unlock audio on first click
+document.addEventListener('click', () => {
+  bell.play().then(() => {
+    bell.pause();
+    bell.currentTime = 0;
+  }).catch(() => {});
+}, { once: true });
 
-  function setMode(mode) {
-    clearInterval(interval);
-    running = false;
-    currentMode = mode;
-    totalSecs = durations[mode] * 60;
-    remainSecs = totalSecs;
-    modeLabel.textContent = mode === 'pomodoro' ? 'focus' : mode === 'short' ? 'rest' : 'long rest';
-    startBtn.textContent = 'BEGIN';
-    updateDisplay();
-  }
+function fmt(s) {
+  const m = Math.floor(s / 60);
+  const ss = s % 60;
+  return `${m}:${ss < 10 ? '0' : ''}${ss}`;
+}
 
-  function toggleTimer() {
-    if (running) {
-      clearInterval(interval);
-      running = false;
-      startBtn.textContent = 'RESUME';
-    } else {
-      running = true;
-      startBtn.textContent = 'PAUSE';
-      interval = setInterval(() => {
-        if (remainSecs > 0) {
-          remainSecs--;
-          updateDisplay();
-        } else {
-          clearInterval(interval);
-          running = false;
-          startBtn.textContent = 'BEGIN';
-          bell.currentTime = 0;
-          bell.play().catch(() => {});
-          timeDisp.style.color = '#c9a84c';
-          setTimeout(() => timeDisp.style.color = '', 2500);
-        }
-      }, 1000);
-    }
-  }
+function updateDisplay() {
+  timeDisp.textContent = fmt(remainSecs);
+  const progress = (remainSecs / totalSecs) * 742;
+  ring.style.strokeDashoffset = (742 - progress).toFixed(1);
+}
 
-  function resetTimer() {
-    clearInterval(interval);
-    running = false;
-    remainSecs = totalSecs;
-    startBtn.textContent = 'BEGIN';
-    updateDisplay();
-  }
-
-  function skipSession() { resetTimer(); }
-
-  timerClickArea.addEventListener('click', () => {
-    if (running) return;
-    let input = prompt(`Set ${currentMode} time:\n\nExamples:\n25\n5:30\n90`, durations[currentMode]);
-    if (input === null) return;
-
-    let totalSeconds = 0;
-    if (input.includes(':')) {
-      const [m, s] = input.split(':').map(Number);
-      totalSeconds = (m || 0) * 60 + (s || 0);
-    } else {
-      totalSeconds = parseFloat(input) * 60;
-    }
-
-    if (totalSeconds > 0) {
-      durations[currentMode] = totalSeconds / 60;
-      totalSecs = Math.floor(totalSeconds);
-      remainSecs = totalSecs;
-      updateDisplay();
-    }
-  });
-
-  document.getElementById('tabs').addEventListener('click', e => {
-    const btn = e.target.closest('.tab');
-    if (btn) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
-      setMode(btn.dataset.mode);
-    }
-  });
-
-  document.addEventListener('click', () => { bell.volume = 0.95; }, { once: true });
-
+function setMode(mode) {
+  clearInterval(interval);
+  running = false;
+  currentMode = mode;
+  totalSecs = durations[mode] * 60;
+  remainSecs = totalSecs;
+  modeLabel.textContent = mode === 'pomodoro' ? 'focus' : mode === 'short' ? 'rest' : 'long rest';
+  startBtn.textContent = 'BEGIN';
   updateDisplay();
+}
+
+function toggleTimer() {
+  if (running) {
+    clearInterval(interval);
+    running = false;
+    startBtn.textContent = 'RESUME';
+  } else {
+    running = true;
+    startBtn.textContent = 'PAUSE';
+
+    interval = setInterval(() => {
+      if (remainSecs > 0) {
+        remainSecs--;
+        updateDisplay();
+      } else {
+        clearInterval(interval);
+        running = false;
+        startBtn.textContent = 'BEGIN';
+
+        bell.currentTime = 0;
+        bell.play().catch(() => {});
+
+        timeDisp.style.color = '#c9a84c';
+        setTimeout(() => timeDisp.style.color = '', 2500);
+      }
+    }, 1000);
+  }
+}
+
+function resetTimer() {
+  clearInterval(interval);
+  running = false;
+  remainSecs = totalSecs;
+  startBtn.textContent = 'BEGIN';
+  updateDisplay();
+}
+
+function skipSession() {
+  resetTimer();
+}
+
+timerClickArea.addEventListener('click', () => {
+  if (running) return;
+
+  let input = prompt(`Set ${currentMode} time:\n\nExamples:\n25\n5:30\n90`, durations[currentMode]);
+  if (input === null) return;
+
+  let totalSeconds = 0;
+
+  if (input.includes(':')) {
+    const [m, s] = input.split(':').map(Number);
+    totalSeconds = (m || 0) * 60 + (s || 0);
+  } else {
+    totalSeconds = parseFloat(input) * 60;
+  }
+
+  if (totalSeconds > 0) {
+    durations[currentMode] = totalSeconds / 60;
+    totalSecs = Math.floor(totalSeconds);
+    remainSecs = totalSecs;
+    updateDisplay();
+  }
+});
+
+document.getElementById('tabs').addEventListener('click', e => {
+  const btn = e.target.closest('.tab');
+  if (btn) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    setMode(btn.dataset.mode);
+  }
+});
+
+updateDisplay();
+
 </script>
+
 </body>
 </html>
