@@ -68,9 +68,23 @@ html, body {
   z-index: 0;
 }
 
-.fog-left   { position: absolute; inset: 0; background: linear-gradient(to right, rgba(8,22,14,0.96) 0%, rgba(8,22,14,0.55) 55%, transparent 100%); z-index: 1; }
-.fog-bottom { position: absolute; inset: 0; background: linear-gradient(to top, rgba(8,22,14,0.75) 0%, transparent 45%); z-index: 1; }
-.fog-top    { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(8,22,14,0.55) 0%, transparent 30%); z-index: 1; }
+.fog-left, .fog-bottom, .fog-top {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.fog-left {
+  background: linear-gradient(to right, rgba(8,22,14,0.96) 0%, rgba(8,22,14,0.55) 55%, transparent 100%);
+}
+
+.fog-bottom {
+  background: linear-gradient(to top, rgba(8,22,14,0.75) 0%, transparent 45%);
+}
+
+.fog-top {
+  background: linear-gradient(to bottom, rgba(8,22,14,0.55) 0%, transparent 30%);
+}
 
 .panel {
   position: relative;
@@ -218,8 +232,6 @@ html, body {
     <div class="ring-wrap">
       <svg class="ring-svg" viewBox="0 0 260 260" width="260" height="260">
         <circle cx="130" cy="130" r="118" fill="none" stroke="rgba(143,184,160,0.08)" stroke-width="8"/>
-
-        <!-- ✅ FIXED RING (STEP 1 APPLIED) -->
         <circle id="progressRing" cx="130" cy="130" r="118" fill="none"
           stroke="#c9a84c" stroke-width="7"
           stroke-dasharray="742"
@@ -246,54 +258,50 @@ html, body {
 
 <script>
 
-// ===== AUDIO =====
+// AUDIO
 let audioCtx;
-
-function initAudio() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function initAudio(){
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
 }
 
-function playStartBell() {
-  if (!audioCtx) return;
-  const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
-
-  o.frequency.value = 600;
-  g.gain.setValueAtTime(0.25, audioCtx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
-
-  o.connect(g); g.connect(audioCtx.destination);
-  o.start(); o.stop(audioCtx.currentTime + 0.8);
+function playStartBell(){
+  if(!audioCtx) return;
+  const o=audioCtx.createOscillator();
+  const g=audioCtx.createGain();
+  o.frequency.value=600;
+  g.gain.setValueAtTime(0.25,audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.8);
+  o.connect(g);g.connect(audioCtx.destination);
+  o.start();o.stop(audioCtx.currentTime+0.8);
 }
 
-function playBell() {
-  if (!audioCtx) return;
-
-  const now = audioCtx.currentTime;
+function playBell(){
+  if(!audioCtx) return;
+  const now=audioCtx.currentTime;
   [440,660,880].forEach((f,i)=>{
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.frequency.value = f;
-    g.gain.setValueAtTime(0.4/(i+1), now);
-    g.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(now); o.stop(now + 2.5);
+    const o=audioCtx.createOscillator();
+    const g=audioCtx.createGain();
+    o.frequency.value=f;
+    g.gain.setValueAtTime(0.4/(i+1),now);
+    g.gain.exponentialRampToValueAtTime(0.001,now+2.5);
+    o.connect(g);g.connect(audioCtx.destination);
+    o.start(now);o.stop(now+2.5);
   });
 }
 
-// ===== TIMER =====
-let durations = { pomodoro: 25, short: 5, long: 15 };
-let currentMode = 'pomodoro';
-let totalSecs = durations.pomodoro * 60;
-let remainSecs = totalSecs;
-let running = false;
-let interval = null;
+// TIMER
+let durations={pomodoro:25,short:5,long:15};
+let currentMode='pomodoro';
+let totalSecs=durations.pomodoro*60;
+let remainSecs=totalSecs;
+let running=false;
+let interval=null;
 
-const ring = document.getElementById('progressRing');
-const timeDisp = document.getElementById('timeDisplay');
-const modeLabel = document.getElementById('modeLabel');
-const startBtn = document.getElementById('startBtn');
-const timerClickArea = document.getElementById('timerClickArea');
+const ring=document.getElementById('progressRing');
+const timeDisp=document.getElementById('timeDisplay');
+const modeLabel=document.getElementById('modeLabel');
+const startBtn=document.getElementById('startBtn');
+const timerClickArea=document.getElementById('timerClickArea');
 
 function fmt(s){
   const m=Math.floor(s/60);
@@ -301,35 +309,34 @@ function fmt(s){
   return `${m}:${ss<10?'0':''}${ss}`;
 }
 
-/* ✅ STEP 3 FIXED (smooth + correct) */
 function updateDisplay(){
-  timeDisp.textContent = fmt(remainSecs);
+  timeDisp.textContent=fmt(remainSecs);
 
   const progress = remainSecs / totalSecs;
   ring.style.strokeDashoffset = (742 * progress).toFixed(1);
 }
 
-// ===== LOGIC =====
+// TIMER CORE
 function toggleTimer(){
   initAudio();
 
   if(running){
     clearInterval(interval);
-    running = false;
-    startBtn.textContent = 'RESUME';
+    running=false;
+    startBtn.textContent='RESUME';
   } else {
     playStartBell();
-    running = true;
-    startBtn.textContent = 'PAUSE';
+    running=true;
+    startBtn.textContent='PAUSE';
 
-    interval = setInterval(()=>{
-      if(remainSecs > 0){
+    interval=setInterval(()=>{
+      if(remainSecs>0){
         remainSecs--;
         updateDisplay();
       } else {
         clearInterval(interval);
-        running = false;
-        startBtn.textContent = 'BEGIN';
+        running=false;
+        startBtn.textContent='BEGIN';
         playBell();
       }
     },1000);
@@ -338,15 +345,52 @@ function toggleTimer(){
 
 function resetTimer(){
   clearInterval(interval);
-  running = false;
-  remainSecs = totalSecs;
-  startBtn.textContent = 'BEGIN';
+  running=false;
+  remainSecs=totalSecs;
+  startBtn.textContent='BEGIN';
   updateDisplay();
 }
 
 function skipSession(){ resetTimer(); }
 
-// ORBS
+// 🔥 RESTORED TIMER EDIT FEATURE
+timerClickArea.addEventListener('click',()=>{
+  if(running) return;
+
+  let input=prompt(`Set ${currentMode} time:\n\nExamples:\n25\n5:30\n90`,durations[currentMode]);
+  if(input===null) return;
+
+  let totalSeconds=0;
+
+  if(input.includes(':')){
+    const [m,s]=input.split(':').map(Number);
+    totalSeconds=(m||0)*60+(s||0);
+  } else {
+    totalSeconds=parseFloat(input)*60;
+  }
+
+  if(totalSeconds>0){
+    durations[currentMode]=totalSeconds/60;
+    totalSecs=Math.floor(totalSeconds);
+    remainSecs=totalSecs;
+    updateDisplay();
+  }
+});
+
+// tabs
+document.getElementById('tabs').addEventListener('click',e=>{
+  const btn=e.target.closest('.tab');
+  if(btn){
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active');
+    currentMode=btn.dataset.mode;
+    totalSecs=durations[currentMode]*60;
+    remainSecs=totalSecs;
+    updateDisplay();
+  }
+});
+
+// orbs
 const orbs=document.getElementById('orbs');
 setInterval(()=>{
   const o=document.createElement('div');
