@@ -158,19 +158,6 @@
       font-size: 18px;
       cursor: pointer;
     }
-
-    /* Editable time input */
-    .time-input {
-      font-family: 'Cinzel', serif;
-      font-size: 58px;
-      background: transparent;
-      border: 2px solid var(--gold);
-      color: var(--cream);
-      text-align: center;
-      width: 180px;
-      border-radius: 12px;
-      outline: none;
-    }
   </style>
 </head>
 <body>
@@ -215,13 +202,7 @@
 </div>
 
 <script>
-  // Store custom durations (in minutes)
-  let durations = {
-    pomodoro: 25,
-    short: 5,
-    long: 15
-  };
-
+  let durations = { pomodoro: 25, short: 5, long: 15 };
   let currentMode = 'pomodoro';
   let totalSecs = durations.pomodoro * 60;
   let remainSecs = totalSecs;
@@ -234,7 +215,8 @@
   const startBtn = document.getElementById('startBtn');
   const timerClickArea = document.getElementById('timerClickArea');
 
-  const bell = new Audio('https://freesound.org/data/previews/66/66930_931655-lq.mp3');
+  // More reliable gentle meditation bell sound
+  const bell = new Audio('https://assets.mixkit.co/sfx/preview/2578/2578.wav');
 
   function fmt(s) {
     const m = Math.floor(s / 60);
@@ -254,8 +236,7 @@
     currentMode = mode;
     totalSecs = durations[mode] * 60;
     remainSecs = totalSecs;
-    modeLabel.textContent = mode === 'pomodoro' ? 'focus' : 
-                           mode === 'short' ? 'rest' : 'long rest';
+    modeLabel.textContent = mode === 'pomodoro' ? 'focus' : mode === 'short' ? 'rest' : 'long rest';
     startBtn.textContent = 'BEGIN';
     updateDisplay();
   }
@@ -276,10 +257,14 @@
           clearInterval(interval);
           running = false;
           startBtn.textContent = 'BEGIN';
+          
+          // Play bell
           bell.currentTime = 0;
-          bell.play().catch(() => {});
+          bell.volume = 0.8;
+          bell.play().catch(e => console.log("Audio play blocked:", e));
+          
           timeDisp.style.color = '#c9a84c';
-          setTimeout(() => timeDisp.style.color = '', 2000);
+          setTimeout(() => timeDisp.style.color = '', 2500);
         }
       }, 1000);
     }
@@ -297,13 +282,10 @@
     resetTimer();
   }
 
-  // Make timer clickable to edit duration
+  // Click time to change duration
   timerClickArea.addEventListener('click', () => {
-    if (running) return; // Don't allow editing while running
-
-    const currentMin = durations[currentMode];
-    const newMin = prompt(`Set ${currentMode} duration (minutes):`, currentMin);
-    
+    if (running) return;
+    const newMin = prompt(`Set ${currentMode} duration in minutes:`, durations[currentMode]);
     if (newMin !== null && !isNaN(newMin) && newMin > 0) {
       durations[currentMode] = parseInt(newMin);
       totalSecs = durations[currentMode] * 60;
@@ -322,7 +304,11 @@
     }
   });
 
-  // Initialize
+  // Unlock audio on first click (helps with browser policy)
+  document.addEventListener('click', () => {
+    bell.volume = 0.8;
+  }, { once: true });
+
   updateDisplay();
 </script>
 </body>
