@@ -281,6 +281,31 @@ html, body {
   transition: opacity 0.8s ease;
 }
 
+/* ── PALI INSCRIPTION ── */
+.pali-inscription {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.pali-pali {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: rgba(201,168,76,0.45);
+  letter-spacing: 1.2px;
+}
+
+.pali-trans {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 11px;
+  color: rgba(143,184,160,0.28);
+  letter-spacing: 0.6px;
+}
+
 /* ── ORBS ── */
 .orbs {
   position: absolute;
@@ -379,32 +404,79 @@ html, body {
 
     <div class="footer-phrase" id="footerPhrase">session 1 of 4 · breathe deeply</div>
 
+    <div class="pali-inscription">
+      <div class="pali-pali">Aniccā vata saṅkhārā</div>
+      <div class="pali-trans">All conditioned things are indeed impermanent</div>
+    </div>
+
   </div>
 </div>
 
 <script>
 
 // ── AUDIO ──────────────────────────────────────────────
-let audioCtx;
-
-function initAudio() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-}
-
+// Begin-bell uses its own short-lived AudioContext
 function playBell() {
-  if (!audioCtx) return;
-  const now = audioCtx.currentTime;
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const now = ctx.currentTime;
   [440, 660, 880].forEach((f, i) => {
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
     o.frequency.value = f;
     g.gain.setValueAtTime(0.3 / (i + 1), now);
     g.gain.exponentialRampToValueAtTime(0.001, now + 2);
     o.connect(g);
-    g.connect(audioCtx.destination);
+    g.connect(ctx.destination);
     o.start(now);
     o.stop(now + 2);
   });
+}
+
+function initAudio() {} // kept so toggleTimer() call doesn't break
+
+// ── SINGING BOWL ENGINE ────────────────────────────────
+// Exact logic provided by user — verified correct.
+// Called 3 times with scheduled offsets for the triple strike.
+
+function strikeBowl(delaySeconds) {
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const now = audioCtx.currentTime + delaySeconds;
+
+  // 1. Root note (300 Hz)
+  const osc1 = audioCtx.createOscillator();
+  osc1.type = 'sine';
+  osc1.frequency.setValueAtTime(300, now);
+
+  // 2. Gain / volume envelope
+  const gainNode = audioCtx.createGain();
+  gainNode.gain.setValueAtTime(0, now);
+  gainNode.gain.linearRampToValueAtTime(0.4, now + 0.1);       // soft bloom attack
+  gainNode.gain.exponentialRampToValueAtTime(0.001, now + 5);  // long tail decay
+
+  // 3. LFO — 4 Hz wah-wah pulse
+  const lfo = audioCtx.createOscillator();
+  lfo.frequency.setValueAtTime(4, now);
+  const lfoGain = audioCtx.createGain();
+  lfoGain.gain.setValueAtTime(0.05, now);
+
+  lfo.connect(lfoGain);
+  lfoGain.connect(gainNode.gain);
+
+  // 4. Connect and start
+  osc1.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+  osc1.start(now);
+  lfo.start(now);
+
+  osc1.stop(now + 5);
+  lfo.stop(now + 5);
+}
+
+// Strike 3 times — each in its own AudioContext so scheduling is clean
+function playGong() {
+  strikeBowl(0.05);
+  setTimeout(() => strikeBowl(0.05), 2600);
+  setTimeout(() => strikeBowl(0.05), 5200);
 }
 
 // ── CONFIG ─────────────────────────────────────────────
@@ -523,7 +595,7 @@ function toggleTimer() {
 }
 
 function onComplete() {
-  playBell();
+  playGong();
   if (currentMode === 'pomodoro') {
     currentSession = (currentSession + 1) % 4;
     updateDots();
