@@ -33,7 +33,6 @@ html, body {
   justify-content: center;
 }
 
-/* ✨ ORBS (background only, won't interfere) */
 .orbs {
   position: absolute;
   inset: 0;
@@ -54,7 +53,7 @@ html, body {
 }
 
 @keyframes floatUp {
-  from { transform: translateY(0) translateX(0); opacity: 0; }
+  from { transform: translateY(0); opacity: 0; }
   10% { opacity: 0.35; }
   to { transform: translateY(-110vh) translateX(40px); opacity: 0; }
 }
@@ -82,7 +81,6 @@ html, body {
   text-align: center;
 }
 
-/* rest unchanged */
 .mantra { font-style: italic; font-size: 13px; color: rgba(143,184,160,0.6); letter-spacing: 1.8px; margin-bottom: 35px; line-height: 1.9; }
 
 .tabs { display: flex; gap: 6px; margin-bottom: 45px; background: rgba(255,255,255,0.04); border: 1px solid rgba(143,184,160,0.12); border-radius: 30px; padding: 5px; }
@@ -117,7 +115,6 @@ html, body {
   <div class="fog-bottom"></div>
   <div class="fog-top"></div>
 
-  <!-- ✨ ORBS -->
   <div class="orbs" id="orbs"></div>
 
   <div class="panel">
@@ -159,16 +156,13 @@ html, body {
 
 <script>
 
-// ===== AUDIO (added, not replacing logic) =====
+// ===== AUDIO =====
 let audioCtx;
 
 function initAudio() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 }
 
-// soft start bell
 function playStartBell() {
   if (!audioCtx) return;
   const o = audioCtx.createOscillator();
@@ -182,7 +176,6 @@ function playStartBell() {
   o.start(); o.stop(audioCtx.currentTime + 0.8);
 }
 
-// end bell (your existing improved one)
 function playBell() {
   if (!audioCtx) return;
 
@@ -198,7 +191,7 @@ function playBell() {
   });
 }
 
-// ===== YOUR ORIGINAL TIMER (UNCHANGED) =====
+// ===== TIMER =====
 let durations = { pomodoro: 25, short: 5, long: 15 };
 let currentMode = 'pomodoro';
 let totalSecs = durations.pomodoro * 60;
@@ -212,43 +205,55 @@ const modeLabel = document.getElementById('modeLabel');
 const startBtn = document.getElementById('startBtn');
 const timerClickArea = document.getElementById('timerClickArea');
 
-function fmt(s) {
-  const m = Math.floor(s / 60);
-  const ss = s % 60;
-  return `${m}:${ss < 10 ? '0' : ''}${ss}`;
+function fmt(s){
+  const m=Math.floor(s/60);
+  const ss=s%60;
+  return `${m}:${ss<10?'0':''}${ss}`;
 }
 
-function updateDisplay() {
+function updateDisplay(){
   timeDisp.textContent = fmt(remainSecs);
-  const progress = (remainSecs / totalSecs) * 742;
-  ring.style.strokeDashoffset = (742 - progress).toFixed(1);
 }
 
-function setMode(mode) {
-  clearInterval(interval);
-  running = false;
-  currentMode = mode;
-  totalSecs = durations[mode] * 60;
-  remainSecs = totalSecs;
-  modeLabel.textContent = mode === 'pomodoro' ? 'focus' : mode === 'short' ? 'rest' : 'long rest';
-  startBtn.textContent = 'BEGIN';
-  updateDisplay();
+// ===== 🔥 SMOOTH RING ENGINE =====
+let startTime = null;
+
+function animateRing(ts){
+  if(!running){
+    startTime = null;
+    requestAnimationFrame(animateRing);
+    return;
+  }
+
+  if(!startTime){
+    startTime = ts - ((totalSecs - remainSecs) * 1000);
+  }
+
+  const elapsed = (ts - startTime) / 1000;
+  const progress = Math.min(elapsed / totalSecs, 1);
+
+  ring.style.strokeDashoffset = (742 * (1 - progress)).toFixed(1);
+
+  requestAnimationFrame(animateRing);
 }
 
-function toggleTimer() {
+requestAnimationFrame(animateRing);
+
+// ===== LOGIC =====
+function toggleTimer(){
   initAudio();
 
-  if (running) {
+  if(running){
     clearInterval(interval);
     running = false;
     startBtn.textContent = 'RESUME';
   } else {
-    playStartBell(); // 🔔 added ONLY here
+    playStartBell();
     running = true;
     startBtn.textContent = 'PAUSE';
 
-    interval = setInterval(() => {
-      if (remainSecs > 0) {
+    interval = setInterval(()=>{
+      if(remainSecs > 0){
         remainSecs--;
         updateDisplay();
       } else {
@@ -256,14 +261,12 @@ function toggleTimer() {
         running = false;
         startBtn.textContent = 'BEGIN';
         playBell();
-        timeDisp.style.color = '#c9a84c';
-        setTimeout(() => timeDisp.style.color = '', 2500);
       }
-    }, 1000);
+    },1000);
   }
 }
 
-function resetTimer() {
+function resetTimer(){
   clearInterval(interval);
   running = false;
   remainSecs = totalSecs;
@@ -271,52 +274,20 @@ function resetTimer() {
   updateDisplay();
 }
 
-function skipSession() { resetTimer(); }
+function skipSession(){ resetTimer(); }
 
-// timer adjust preserved
-timerClickArea.addEventListener('click', () => {
-  if (running) return;
-  let input = prompt(`Set ${currentMode} time:\n\nExamples:\n25\n5:30\n90`, durations[currentMode]);
-  if (input === null) return;
-
-  let totalSeconds = 0;
-  if (input.includes(':')) {
-    const [m, s] = input.split(':').map(Number);
-    totalSeconds = (m || 0) * 60 + (s || 0);
-  } else {
-    totalSeconds = parseFloat(input) * 60;
-  }
-
-  if (totalSeconds > 0) {
-    durations[currentMode] = totalSeconds / 60;
-    totalSecs = Math.floor(totalSeconds);
-    remainSecs = totalSecs;
-    updateDisplay();
-  }
-});
-
-// tabs preserved
-document.getElementById('tabs').addEventListener('click', e => {
-  const btn = e.target.closest('.tab');
-  if (btn) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    btn.classList.add('active');
-    setMode(btn.dataset.mode);
-  }
-});
-
-updateDisplay();
-
-// ✨ ORBS SPAWN (isolated, no interference)
-const orbs = document.getElementById('orbs');
+// ORBS
+const orbs=document.getElementById('orbs');
 setInterval(()=>{
-  const o = document.createElement('div');
+  const o=document.createElement('div');
   o.className='orb';
   o.style.left=Math.random()*100+'vw';
   o.style.animationDuration=(8+Math.random()*5)+'s';
   orbs.appendChild(o);
   setTimeout(()=>o.remove(),13000);
 },700);
+
+updateDisplay();
 
 </script>
 
